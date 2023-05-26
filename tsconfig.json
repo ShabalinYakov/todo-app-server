@@ -1,0 +1,22 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es2016",
+    "lib": ["es2016", "esnext.asynciterable"],
+    "module": "CommonJS",
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types"],
+    "allowJs": true,
+    "sourceMap": true,
+    "outDir": "build",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "importHelpers": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.json", ".env", "src/process.d.ts"],
+  "exclude": ["node_modules"]
+}
