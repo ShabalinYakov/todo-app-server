@@ -12,7 +12,7 @@ const db = {
     ssl: { rejectUnauthorized: false },
   },
   pool: {
-    min: 2,
+    min: 0,
     max: 10,
   },
 };

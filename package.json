@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "rimraf ./build && cross-env NODE_ENV=production npx tsc",
-    "start": "yarn build && node build/main.js",
+    "start": "yarn build && cross-env NODE_ENV=production node build/main.js",
     "lint": "eslint --ignore-path .eslintignore \"src/**/*.ts\" --fix",
     "lint:check": "eslint --ignore-path .eslintignore \"src/**/*.ts\"",
     "prettier": "prettier --write \"src/**/*.ts\"",
