@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import hpp from 'hpp';
 
+import errorMiddleware from './middlewares/error.middleware';
 import { CREDENTIALS, LOG_FORMAT, ORIGIN } from './config';
 import { stream } from './utils/logger';
 import router from './routes';
@@ -21,5 +22,5 @@ app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
 app.use(hpp());
 app.use(helmet());
 app.use('/api', router);
-
+app.use(errorMiddleware);
 export default app;
