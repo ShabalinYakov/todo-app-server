@@ -17,4 +17,5 @@ export const {
   ORIGIN,
   LOG_DIR,
   LOG_FORMAT,
+  MAX_AGE_COOKIE,
 } = process.env;

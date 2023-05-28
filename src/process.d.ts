@@ -3,7 +3,7 @@ declare namespace NodeJS {
     PORT: string;
 
     DB_HOST: string;
-    DB_PORT: string;
+    DB_PORT: number;
     DB_USER: string;
     DB_PASSWORD: string;
     DB_DATABASE: string;
@@ -18,5 +18,7 @@ declare namespace NodeJS {
 
     LOG_DIR: string;
     LOG_FORMAT: string;
+
+    MAX_AGE_COOKIE: number;
   }
 }
