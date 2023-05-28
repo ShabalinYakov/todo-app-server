@@ -15,4 +15,6 @@ export const {
   ACCESS_SECRET_KEY,
   REFRESH_SECRET_KEY,
   ORIGIN,
+  LOG_DIR,
+  LOG_FORMAT,
 } = process.env;
