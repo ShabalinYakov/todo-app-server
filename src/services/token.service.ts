@@ -28,6 +28,14 @@ class TokenService {
     ]);
     return token.rows[0];
   }
+
+  validateAccessToken(accessToken: string) {
+    try {
+      return jwt.verify(accessToken, ACCESS_SECRET_KEY) as TokenPayload;
+    } catch (error) {
+      return null;
+    }
+  }
 }
 
 export const tokenService = new TokenService();
