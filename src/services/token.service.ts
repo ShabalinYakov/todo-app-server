@@ -36,6 +36,20 @@ class TokenService {
       return null;
     }
   }
+
+  validateRefreshToken(refreshToken: string) {
+    try {
+      return jwt.verify(refreshToken, REFRESH_SECRET_KEY) as TokenPayload;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async findToken(refreshToken: string) {
+    const { rows: token } = await db.query(`SELECT * FROM tokens WHERE refresh_token = $1;`, [refreshToken]);
+
+    return token[0];
+  }
 }
 
 export const tokenService = new TokenService();
