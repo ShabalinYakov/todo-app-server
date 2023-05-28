@@ -15,5 +15,8 @@ declare namespace NodeJS {
 
     ORIGIN: string;
     CREDENTIALS: string;
+
+    LOG_DIR: string;
+    LOG_FORMAT: string;
   }
 }

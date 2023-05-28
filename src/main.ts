@@ -1,14 +1,15 @@
-import app from './app';
 import { NODE_ENV, PORT } from './config';
+import { logger } from './utils/logger';
+import app from './app';
 
 const start = async () => {
   try {
     app.listen(PORT, () => {
-      console.log(`======== ENV: ${NODE_ENV} =======`);
-      console.log(`🚀 App listening on the port ${PORT}`);
+      logger.info(`======== ENV: ${NODE_ENV} =======`);
+      logger.info(`🚀 App listening on the port ${PORT}`);
     });
   } catch (error) {
-    console.log(error);
+    logger.info(error);
     process.exit(1);
   }
 };
