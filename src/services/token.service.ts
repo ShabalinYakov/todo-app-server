@@ -16,13 +16,16 @@ class TokenService {
   }
 
   async saveToken(userId: string, refreshToken: string) {
-    const { rows: tokenData } = await db.raw(`SELECT * FROM tokens WHERE user_id = $1;`, [userId]);
+    const { rows: tokenData } = await db.query(`SELECT * FROM tokens WHERE user_id = $1;`, [userId]);
 
     if (tokenData[0]) {
-      const token = await db.raw(`UPDATE tokens SET refresh_token = $1 WHERE user_id = $2;`, [refreshToken, userId]);
+      const token = await db.query(`UPDATE tokens SET refresh_token = $1 WHERE user_id = $2;`, [refreshToken, userId]);
       return token.rows[0];
     }
-    const token = await db.raw(`INSERT INTO tokens (user_id, refresh_token) VALUES ($1, $2);`, [userId, refreshToken]);
+    const token = await db.query(`INSERT INTO tokens (user_id, refresh_token) VALUES ($1, $2);`, [
+      userId,
+      refreshToken,
+    ]);
     return token.rows[0];
   }
 }

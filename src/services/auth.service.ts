@@ -7,7 +7,7 @@ import db from '../databases';
 
 class AuthService {
   async login({ login, password }: LoginPayload) {
-    const { rows: user } = await db.raw(`SELECT * FROM users WHERE login = $1;`, [login]);
+    const { rows: user } = await db.query(`SELECT * FROM users WHERE login = $1;`, [login]);
     if (!user[0]) throw ApiErrors.BadRequest('Пользователь не найден');
 
     const isPasswordMatching = await compare(password, user[0].password);
