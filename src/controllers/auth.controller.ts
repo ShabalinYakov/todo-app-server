@@ -27,14 +27,14 @@ class AuthController {
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.cookies;
-      const { refreshToken: newToken, accessToken, user } = await authService.refresh(refreshToken);
+      const { refreshToken: newToken, accessToken } = await authService.refresh(refreshToken);
 
       res.cookie('refreshToken', newToken, {
         maxAge: MAX_AGE_COOKIE,
         httpOnly: true,
       });
 
-      res.status(200).send({ accessToken, user });
+      res.status(200).send({ accessToken });
     } catch (error) {
       next(error);
     }
