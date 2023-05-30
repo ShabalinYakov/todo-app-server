@@ -14,7 +14,7 @@ class AuthController {
       const { login, password } = req.body;
       const response = await authService.login({ login, password });
       if (response.error !== null) {
-        res.status(200).send(response.error);
+        res.status(200).send({ error: response.error });
         return;
       }
 

@@ -9,10 +9,10 @@ import db from '../databases';
 class AuthService {
   async login({ login, password }: LoginPayload) {
     const { rows: user } = await db.query(`SELECT * FROM users WHERE login = $1;`, [login]);
-    if (!user[0]) return { error: { code: 400, message: 'Пользователя с таким логином не существует' } };
+    if (!user[0]) return { error: { code: 102, message: 'Пользователя с таким логином не существует' } };
 
     const isPasswordMatching = await compare(password, user[0].password);
-    if (!isPasswordMatching) return { error: { code: 400, message: 'Неверный пароль' } };
+    if (!isPasswordMatching) return { error: { code: 103, message: 'Неверный пароль' } };
 
     return this.createToken(user[0]);
   }
