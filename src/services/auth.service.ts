@@ -9,10 +9,10 @@ import db from '../databases';
 class AuthService {
   async login({ login, password }: LoginPayload) {
     const { rows: user } = await db.query(`SELECT * FROM users WHERE login = $1;`, [login]);
-    if (!user[0]) throw ApiError.BadRequest('Пользователь не найден');
+    if (!user[0]) return { error: { code: 400, message: 'Пользователя с таким логином не существует' } };
 
     const isPasswordMatching = await compare(password, user[0].password);
-    if (!isPasswordMatching) throw ApiError.BadRequest('Неверный пароль');
+    if (!isPasswordMatching) return { error: { code: 400, message: 'Неверный пароль' } };
 
     return this.createToken(user[0]);
   }
@@ -23,7 +23,7 @@ class AuthService {
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
 
-    if (!userData || !tokenFromDb) throw new ApiError(500, 'Токен не валиден или не обнаружет в БД');
+    if (!userData || !tokenFromDb) throw new ApiError(500, 'Токен не валиден или не обнаружен в БД');
     if (userData.id !== tokenFromDb.user_id) throw new ApiError(500, 'Токен не принадлежит пользователю');
 
     const { rows: findUser } = await db.query(`SELECT * FROM users WHERE id = $1;`, [userData.id]);
@@ -35,7 +35,7 @@ class AuthService {
     const tokens = tokenService.generateTokens({ id, login, is_leader });
     await tokenService.saveToken(id, tokens.refreshToken);
 
-    return { ...tokens, user: { id, login, first_name, middle_name, last_name, is_leader } };
+    return { ...tokens, user: { id, login, first_name, middle_name, last_name, is_leader }, error: null };
   }
 }
 
