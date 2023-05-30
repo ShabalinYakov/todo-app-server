@@ -12,13 +12,17 @@ class AuthController {
       if (!errors.isEmpty()) throw ApiError.BadRequest('Invalid value');
 
       const { login, password } = req.body;
-      const { accessToken, refreshToken, user } = await authService.login({ login, password });
+      const response = await authService.login({ login, password });
+      if (response.error !== null) {
+        res.status(200).send(response.error);
+        return;
+      }
 
-      res.cookie('refreshToken', refreshToken, {
+      res.cookie('refreshToken', response.refreshToken, {
         maxAge: MAX_AGE_COOKIE,
         httpOnly: true,
       });
-      res.status(200).send({ accessToken, user });
+      res.status(200).send({ accessToken: response.accessToken, user: response.user, error: {} });
     } catch (error) {
       next(error);
     }
