@@ -50,6 +50,14 @@ class TokenService {
 
     return token[0];
   }
+
+  async removeToken(refreshToken: string) {
+    const { rows: removedToken } = await db.query(
+      `DELETE FROM tokens WHERE refresh_token = $1 RETURNING refresh_token;`,
+      [refreshToken],
+    );
+    return removedToken[0];
+  }
 }
 
 export const tokenService = new TokenService();
