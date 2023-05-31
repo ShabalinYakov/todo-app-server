@@ -6,4 +6,5 @@ const authRouter = Router({ mergeParams: true });
 
 authRouter.post('/login', [body(['login', 'password']).trim().isString().notEmpty()], authController.login);
 authRouter.get('/refresh', authController.refresh);
+authRouter.post('/logout', authController.logout);
 export default authRouter;

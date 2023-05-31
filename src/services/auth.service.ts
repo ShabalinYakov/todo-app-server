@@ -37,6 +37,11 @@ class AuthService {
 
     return { ...tokens, user: { id, login, first_name, middle_name, last_name, is_leader }, error: null };
   }
+
+  async logout(refreshToken: string) {
+    const removedToken = await tokenService.removeToken(refreshToken);
+    return removedToken;
+  }
 }
 
 export const authService = new AuthService();
