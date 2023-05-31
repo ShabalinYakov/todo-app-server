@@ -31,14 +31,26 @@ class AuthController {
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.cookies;
-      const { refreshToken: newToken, accessToken } = await authService.refresh(refreshToken);
+      const { refreshToken: newToken, accessToken, user } = await authService.refresh(refreshToken);
 
       res.cookie('refreshToken', newToken, {
         maxAge: MAX_AGE_COOKIE,
         httpOnly: true,
       });
 
-      res.status(200).send({ accessToken });
+      res.status(200).send({ accessToken, user, error: {} });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { refreshToken } = req.cookies;
+      const removedToken = await authService.logout(refreshToken);
+
+      res.clearCookie('refreshToken');
+      res.status(200).json(removedToken);
     } catch (error) {
       next(error);
     }
