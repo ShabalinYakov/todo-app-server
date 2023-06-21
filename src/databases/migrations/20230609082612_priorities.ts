@@ -6,6 +6,9 @@ export async function up(knex: Knex): Promise<void> {
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR NOT NULL
   );
+
+  CREATE INDEX priorities_id_idx
+  ON priorities(id);
   `);
 }
 

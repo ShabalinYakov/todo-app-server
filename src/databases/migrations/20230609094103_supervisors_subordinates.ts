@@ -6,6 +6,12 @@ export async function up(knex: Knex): Promise<void> {
     supervisor UUID REFERENCES users(id) ON DELETE CASCADE,
     subordinate UUID REFERENCES users(id) ON DELETE CASCADE
   );
+
+  CREATE INDEX supervisors_subordinates_subordinate_idx
+  ON supervisors_subordinates(subordinate);
+
+  CREATE INDEX supervisors_subordinates_supervisor_idx
+  ON supervisors_subordinates(supervisor);
   `);
 }
 

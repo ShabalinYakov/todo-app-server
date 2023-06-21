@@ -6,6 +6,9 @@ export async function up(knex: Knex): Promise<void> {
     task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
     priority_id UUID REFERENCES priorities(id) ON DELETE CASCADE
   );
+
+  CREATE INDEX tasks_priorities_idx
+  ON tasks_priorities(task_id);
   `);
 }
 
