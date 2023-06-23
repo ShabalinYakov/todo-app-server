@@ -1,7 +1,7 @@
 import db from '../databases';
 
 class LeaderService {
-  async getTasksSubordinates(userId: string) {
+  async getTasksSubordinate(userId: string, subordinateId: string) {
     try {
       const { rows: tasks } = await db.query(
         `
@@ -24,10 +24,10 @@ class LeaderService {
           LEFT JOIN statuses ON statuses.id = s.status_id
           LEFT JOIN users AS creator ON creator.id = c.user_id
           LEFT JOIN users AS responsible ON responsible.id = r.user_id
-      WHERE c.user_id = $1 AND r.user_id != $1
+      WHERE c.user_id = $1 AND r.user_id = $2
       ORDER BY responsible DESC;
       `,
-        [userId],
+        [userId, subordinateId],
       );
       return tasks;
     } catch (error) {
