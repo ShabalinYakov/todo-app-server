@@ -34,6 +34,23 @@ class LeaderService {
       console.log(error);
     }
   }
+  async getSubordinates(userId: string) {
+    try {
+      const { rows: subordinates } = await db.query(
+        `
+        SELECT users.id,
+            CONCAT(users.last_name || ' ' || ' ' || users.first_name || ' ' || users.middle_name) AS fullname
+        FROM supervisors_subordinates AS s
+            JOIN users ON s.subordinate = users.id
+        WHERE s.supervisor = $1;
+      `,
+        [userId],
+      );
+      return subordinates;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 export const leaderService = new LeaderService();
