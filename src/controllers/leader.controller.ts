@@ -16,12 +16,36 @@ class LeaderController {
       next(error);
     }
   }
+
   async getSubordinates(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as RequestWithUser).user.id;
       const subordinates = await leaderService.getSubordinates(userId);
 
       res.status(200).send(subordinates);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as RequestWithUser).user.id;
+      const taskValue = req.body;
+
+      const response = await leaderService.createTask(userId, taskValue);
+      res.status(200).send(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = req.body;
+
+      const response = await leaderService.updateTask(payload);
+      res.status(200).send(response);
     } catch (error) {
       next(error);
     }

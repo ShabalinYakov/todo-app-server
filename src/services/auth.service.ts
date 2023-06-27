@@ -3,7 +3,7 @@ import { compare } from 'bcryptjs';
 import { LoginPayload } from '../interfaces/auth.interfaces';
 import { User } from '../interfaces/user.interfaces';
 import { tokenService } from './token.service';
-import ApiError from '../exceptions/api-error';
+import HttpException from '../exceptions/HttpException';
 import db from '../databases';
 
 class AuthService {
@@ -18,13 +18,13 @@ class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    if (!refreshToken) throw new ApiError(500, 'Отсутствует токен');
+    if (!refreshToken) throw new HttpException(500, 'Отсутствует токен');
 
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
 
-    if (!userData || !tokenFromDb) throw new ApiError(500, 'Токен не валиден или не обнаружен в БД');
-    if (userData.id !== tokenFromDb.user_id) throw new ApiError(500, 'Токен не принадлежит пользователю');
+    if (!userData || !tokenFromDb) throw new HttpException(500, 'Токен не валиден или не обнаружен в БД');
+    if (userData.id !== tokenFromDb.user_id) throw new HttpException(500, 'Токен не принадлежит пользователю');
 
     const { rows: findUser } = await db.query(`SELECT * FROM users WHERE id = $1;`, [userData.id]);
     return await this.createToken(findUser[0]);

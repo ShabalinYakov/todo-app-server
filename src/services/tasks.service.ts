@@ -1,36 +1,175 @@
 import db from '../databases';
+import { Task } from '../interfaces/task.interfaces';
 
 class TasksService {
   async getAllTasksViewer(userId: string) {
     try {
-      const { rows: tasks } = await db.query(
-        `
-        SELECT tasks.*,
-            TO_CHAR(tasks.deadline, 'yyyy-mm-dd') AS deadline,
-            priorities.name AS priority,
-            statuses.name AS status,
-            CONCAT(
-                creator.last_name || ' ' || ' ' || creator.first_name || ' ' || creator.middle_name
-            ) AS creator,
-            CONCAT(
-                responsible.last_name || ' ' || responsible.first_name || ' ' || responsible.middle_name
-            ) AS responsible
-        FROM tasks
-            JOIN tasks_priorities AS p ON tasks.id = p.task_id
-            JOIN tasks_statuses AS s ON tasks.id = s.task_id
-            JOIN creators_tasks AS c ON tasks.id = c.task_id
-            JOIN responsibles_tasks AS r ON tasks.id = r.task_id
-            LEFT JOIN priorities ON priorities.id = p.priority_id
-            LEFT JOIN statuses ON statuses.id = s.status_id
-            LEFT JOIN users AS creator ON creator.id = c.user_id
-            LEFT JOIN users AS responsible ON responsible.id = r.user_id
-        WHERE r.user_id = $1 
-        ORDER BY tasks.updated_at DESC;
-        `,
-        [userId],
-      );
+      const { rows: tasks } = await db.query('SELECT * FROM get_tasks_viewer($1);', [userId]);
 
       return tasks;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async createTask(userId: string, taskValue: Task) {
+    const { title, description, priority, deadline } = taskValue;
+    const status = 'f07a90c3-af5e-4b5e-ad3e-b450dbcf8c97';
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+
+      const { rows } = await client.query(
+        `INSERT INTO tasks(title, description, deadline) VALUES($1, $2, $3) RETURNING *`,
+        [title, description, deadline],
+      );
+      const task_id = rows[0].id;
+
+      await client.query(`INSERT INTO tasks_priorities(task_id, priority_id) VALUES($1, $2)`, [task_id, priority]);
+
+      await client.query(`INSERT INTO tasks_statuses(task_id, status_id) VALUES($1, $2)`, [task_id, status]);
+
+      await client.query(`INSERT INTO creators_tasks(user_id, task_id) VALUES($1, $2)`, [userId, task_id]);
+
+      await client.query(`INSERT INTO responsibles_tasks(user_id, task_id) VALUES($1, $2)`, [userId, task_id]);
+
+      await client.query('COMMIT');
+
+      const { rows: task } = await client.query(`SELECT * FROM get_task_by_id($1)`, [task_id]);
+      return task[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.log(error);
+      return { message: 'invalid query' };
+    } finally {
+      client.release();
+    }
+  }
+
+  async isCreator(taskId: string, userId: string) {
+    try {
+      const { rows } = await db.query(
+        `SELECT EXISTS(SELECT * FROM creators_tasks WHERE task_id = $1 and user_id = $2)`,
+        [taskId, userId],
+      );
+      return rows[0].exists;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateStatus(taskId: string, statusId: string) {
+    try {
+      await db.query(
+        ` UPDATE tasks_statuses AS ts 
+          SET status_id = $2 
+          WHERE ts.task_id = $1`,
+        [taskId, statusId],
+      );
+
+      const { rows: status } = await db.query(
+        `SELECT ts.task_id, 
+                s.name as status_name 
+         FROM tasks_statuses AS ts 
+           LEFT JOIN statuses AS s ON ts.status_id = s.id
+         WHERE ts.task_id = $1`,
+        [taskId],
+      );
+
+      return status[0];
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateTitle(taskId: string, statusId: string) {
+    try {
+      await db.query(
+        ` UPDATE tasks_statuses AS ts 
+          SET status_id = $2 
+          WHERE ts.task_id = $1`,
+        [taskId, statusId],
+      );
+
+      const { rows: status } = await db.query(
+        `SELECT ts.task_id, 
+                s.name as status_name 
+         FROM tasks_statuses AS ts 
+           LEFT JOIN statuses AS s ON ts.status_id = s.id
+         WHERE ts.task_id = $1`,
+        [taskId],
+      );
+
+      return status[0];
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async updateDescription(taskId: string, statusId: string) {
+    try {
+      await db.query(
+        ` UPDATE tasks_statuses AS ts 
+          SET status_id = $2 
+          WHERE ts.task_id = $1`,
+        [taskId, statusId],
+      );
+
+      const { rows: status } = await db.query(
+        `SELECT ts.task_id, 
+                s.name as status_name 
+         FROM tasks_statuses AS ts 
+           LEFT JOIN statuses AS s ON ts.status_id = s.id
+         WHERE ts.task_id = $1`,
+        [taskId],
+      );
+
+      return status[0];
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async updateDeadline(taskId: string, statusId: string) {
+    try {
+      await db.query(
+        ` UPDATE tasks_statuses AS ts 
+          SET status_id = $2 
+          WHERE ts.task_id = $1`,
+        [taskId, statusId],
+      );
+
+      const { rows: status } = await db.query(
+        `SELECT ts.task_id, 
+                s.name as status_name 
+         FROM tasks_statuses AS ts 
+           LEFT JOIN statuses AS s ON ts.status_id = s.id
+         WHERE ts.task_id = $1`,
+        [taskId],
+      );
+
+      return status[0];
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async updatePriority(taskId: string, statusId: string) {
+    try {
+      await db.query(
+        ` UPDATE tasks_statuses AS ts 
+          SET status_id = $2 
+          WHERE ts.task_id = $1`,
+        [taskId, statusId],
+      );
+
+      const { rows: status } = await db.query(
+        `SELECT ts.task_id, 
+                s.name as status_name 
+         FROM tasks_statuses AS ts 
+           LEFT JOIN statuses AS s ON ts.status_id = s.id
+         WHERE ts.task_id = $1`,
+        [taskId],
+      );
+
+      return status[0];
     } catch (error) {
       console.log(error);
     }

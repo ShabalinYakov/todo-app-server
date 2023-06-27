@@ -2,14 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 
 import { authService } from '../services/auth.service';
-import ApiError from '../exceptions/api-error';
+import HttpException from '../exceptions/HttpException';
 import { MAX_AGE_COOKIE } from '../config';
 
 class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) throw ApiError.BadRequest('Invalid value');
+      if (!errors.isEmpty()) throw HttpException.BadRequest('Invalid value');
 
       const { login, password } = req.body;
       const response = await authService.login({ login, password });
