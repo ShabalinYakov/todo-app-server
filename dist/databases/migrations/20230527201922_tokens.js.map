@@ -1,0 +1,1 @@
+{"version":3,"file":"20230527201922_tokens.js","sourceRoot":"","sources":["../../../src/databases/migrations/20230527201922_tokens.ts"],"names":[],"mappings":";;;AAEO,KAAK,UAAU,EAAE,CAAC,IAAU;IACjC,OAAO,MAAM,IAAI,CAAC,GAAG,CAAC;;;;;;;;GAQrB,CAAC,CAAC;AACL,CAAC;AAVD,gBAUC;AAEM,KAAK,UAAU,IAAI,CAAC,IAAU;IACnC,OAAO,MAAM,IAAI,CAAC,GAAG,CAAC,oBAAoB,CAAC,CAAC;AAC9C,CAAC;AAFD,oBAEC"}

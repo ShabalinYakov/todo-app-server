@@ -9,10 +9,12 @@ import db from '../databases';
 class AuthService {
   async login({ login, password }: LoginPayload) {
     const { rows: user } = await db.query(`SELECT * FROM users WHERE login = $1;`, [login]);
-    if (!user[0]) return { error: { code: 102, message: 'Пользователя с таким логином не существует' } };
+    // if (!user[0]) throw new HttpException(102, 'Пользователя с таким логином не существует');
+    // if (!user[0]) return { error: { code: 102, message: 'Пользователя с таким логином не существует' } };
 
     const isPasswordMatching = await compare(password, user[0].password);
-    if (!isPasswordMatching) return { error: { code: 103, message: 'Неверный пароль' } };
+    if (!isPasswordMatching) throw new HttpException(103, 'Неверный пароль');
+    // if (!isPasswordMatching) return { error: { code: 103, message: 'Неверный пароль' } };
 
     return this.createToken(user[0]);
   }
@@ -35,7 +37,7 @@ class AuthService {
     const tokens = tokenService.generateTokens({ id, login, is_leader });
     await tokenService.saveToken(id, tokens.refreshToken);
 
-    return { ...tokens, user: { id, login, first_name, middle_name, last_name, is_leader }, error: null };
+    return { ...tokens, user: { id, login, first_name, middle_name, last_name, is_leader } };
   }
 
   async logout(refreshToken: string) {

@@ -13,11 +13,10 @@ class AuthController {
 
       const { login, password } = req.body;
       const response = await authService.login({ login, password });
-      if (response.error !== null) {
-        res.status(200).send({ error: response.error });
-        return;
-      }
-
+      // if (response.error !== null) {
+      //   res.status(200).send({ error: response.error });
+      //   return;
+      // }
       res.cookie('refreshToken', response.refreshToken, {
         maxAge: MAX_AGE_COOKIE,
         httpOnly: true,
