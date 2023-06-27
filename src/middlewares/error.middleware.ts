@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import ApiError from '../exceptions/api-error';
+import HttpException from '../exceptions/HttpException';
+import { logger } from '../utils/logger';
 
-const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
+const errorMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
   try {
-    if (err instanceof ApiError) {
-      return res.status(err.status).json({ message: err.message });
-    }
-    return res.status(500).json({ message: 'На сервере произошла ошибка. Попробуйте позже' });
+    const status: number = error.status || 500;
+    const message: string = error.message || 'Something went wrong';
+
+    logger.error(`[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`);
+    res.status(status).json({ message });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
