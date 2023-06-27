@@ -18,7 +18,7 @@ class AuthController {
       //   return;
       // }
       res.cookie('refreshToken', response.refreshToken, {
-        maxAge: MAX_AGE_COOKIE,
+        maxAge: Number(MAX_AGE_COOKIE),
         httpOnly: true,
       });
       res.status(200).send({ accessToken: response.accessToken, user: response.user, error: {} });
@@ -33,7 +33,7 @@ class AuthController {
       const { refreshToken: newToken, accessToken, user } = await authService.refresh(refreshToken);
 
       res.cookie('refreshToken', newToken, {
-        maxAge: MAX_AGE_COOKIE,
+        maxAge: Number(MAX_AGE_COOKIE),
         httpOnly: true,
       });
 

@@ -1,1 +1,0 @@
-{"version":3,"file":"20230609082746_statuses.js","sourceRoot":"","sources":["../../../src/databases/migrations/20230609082746_statuses.ts"],"names":[],"mappings":";;;AAEO,KAAK,UAAU,EAAE,CAAC,IAAU;IACjC,OAAO,MAAM,IAAI,CAAC,GAAG,CAAC;;;;;;;;GAQrB,CAAC,CAAC;AACL,CAAC;AAVD,gBAUC;AAEM,KAAK,UAAU,IAAI,CAAC,IAAU;IACnC,OAAO,MAAM,IAAI,CAAC,GAAG,CAAC,sBAAsB,CAAC,CAAC;AAChD,CAAC;AAFD,oBAEC"}
