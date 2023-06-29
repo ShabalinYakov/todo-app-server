@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
   );
 
   CREATE INDEX users_id_idx
-  ON users(id);
+  ON users(login);
   `);
 }
 

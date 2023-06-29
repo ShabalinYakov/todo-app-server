@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import { tokenService } from '@services/token.service';
+import HttpException from '@exceptions/HttpException';
 
-import { RequestWithUser } from '../interfaces/auth.interfaces';
-import { tokenService } from '../services/token.service';
-import HttpException from '../exceptions/HttpException';
-
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
@@ -21,7 +20,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
       return next(HttpException.UnauthorizedError());
     }
 
-    (req as RequestWithUser).user = userData;
+    req.user = userData;
     next();
   } catch (error) {
     return next(HttpException.UnauthorizedError());

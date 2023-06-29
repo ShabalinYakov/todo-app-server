@@ -1,13 +1,13 @@
+import { logger } from '@/utils/logger';
 import db from '../databases';
 
 class StatusesService {
   async getStatuses() {
     try {
-      const { rows: statuses } = await db.query(`SELECT * FROM statuses;`);
-
+      const statuses = await db('statuses');
       return statuses;
     } catch (error) {
-      console.log(error);
+      logger.error(`[getStatuses] >> Error : ${error}`);
     }
   }
 }

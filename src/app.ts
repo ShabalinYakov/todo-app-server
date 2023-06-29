@@ -6,10 +6,10 @@ import morgan from 'morgan';
 import cors from 'cors';
 import hpp from 'hpp';
 
-import errorMiddleware from './middlewares/error.middleware';
-import { CREDENTIALS, LOG_FORMAT, ORIGIN } from './config';
-import { stream } from './utils/logger';
-import router from './routes';
+import errorMiddleware from '@middlewares/error.middleware';
+import { CREDENTIALS, LOG_FORMAT, ORIGIN } from '@config';
+import { stream } from '@utils/logger';
+import router from '@routes/index';
 
 const app = express();
 
@@ -23,4 +23,5 @@ app.use(hpp());
 app.use(helmet());
 app.use('/api', router);
 app.use(errorMiddleware);
+
 export default app;

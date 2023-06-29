@@ -1,177 +1,130 @@
+import { logger } from '@/utils/logger';
 import db from '../databases';
-import { Task } from '../interfaces/task.interfaces';
+import { Task } from '@/interfaces/task.interfaces';
 
 class TasksService {
-  async getAllTasksViewer(userId: string) {
+  async getTasks(user_id: string) {
     try {
-      const { rows: tasks } = await db.query('SELECT * FROM get_tasks_viewer($1);', [userId]);
-
+      const { rows: tasks } = await db.raw('SELECT * FROM get_tasks_user(?)', [user_id]);
       return tasks;
     } catch (error) {
-      console.log(error);
+      logger.error(`[getTasks] >> Error : ${error}`);
     }
   }
 
-  async createTask(userId: string, taskValue: Task) {
-    const { title, description, priority, deadline } = taskValue;
-    const status = 'f07a90c3-af5e-4b5e-ad3e-b450dbcf8c97';
-    const client = await db.connect();
+  async getTasksSubordinate(user_id: string, subordinate_id: string) {
     try {
-      await client.query('BEGIN');
-
-      const { rows } = await client.query(
-        `INSERT INTO tasks(title, description, deadline) VALUES($1, $2, $3) RETURNING *`,
-        [title, description, deadline],
-      );
-      const task_id = rows[0].id;
-
-      await client.query(`INSERT INTO tasks_priorities(task_id, priority_id) VALUES($1, $2)`, [task_id, priority]);
-
-      await client.query(`INSERT INTO tasks_statuses(task_id, status_id) VALUES($1, $2)`, [task_id, status]);
-
-      await client.query(`INSERT INTO creators_tasks(user_id, task_id) VALUES($1, $2)`, [userId, task_id]);
-
-      await client.query(`INSERT INTO responsibles_tasks(user_id, task_id) VALUES($1, $2)`, [userId, task_id]);
-
-      await client.query('COMMIT');
-
-      const { rows: task } = await client.query(`SELECT * FROM get_task_by_id($1)`, [task_id]);
-      return task[0];
+      const { rows: tasks } = await db.raw(`SELECT * FROM get_tasks_subordinate(?, ?)`, [user_id, subordinate_id]);
+      return tasks;
     } catch (error) {
-      await client.query('ROLLBACK');
-      console.log(error);
-      return { message: 'invalid query' };
-    } finally {
-      client.release();
+      logger.error(`[getTasks] >> Error : ${error}`);
     }
   }
 
-  async isCreator(taskId: string, userId: string) {
+  async createTask(creator_id: string, taskData: Task) {
+    const { title, deadline, description, priority: priority_id, responsible } = taskData;
+    const status_id = 'f07a90c3-af5e-4b5e-ad3e-b450dbcf8c97'; // к выполнению
+
     try {
-      const { rows } = await db.query(
-        `SELECT EXISTS(SELECT * FROM creators_tasks WHERE task_id = $1 and user_id = $2)`,
-        [taskId, userId],
-      );
-      return rows[0].exists;
+      const { rows: createdTask } = await db.transaction(async trx => {
+        const [newTask] = await trx('tasks').insert({ title, deadline, description }).returning('id');
+        const task_id = newTask.id;
+
+        await trx('responsibles_tasks').insert({ task_id, user_id: responsible });
+        await trx('creators_tasks').insert({ task_id, user_id: creator_id });
+        await trx('tasks_priorities').insert({ task_id, priority_id });
+        await trx('tasks_statuses').insert({ task_id, status_id });
+
+        const createdTask = await trx.raw('SELECT * FROM get_task_by_id(?)', [task_id]);
+
+        return createdTask;
+      });
+
+      return createdTask[0];
     } catch (error) {
-      console.log(error);
+      logger.error(`[createTask] >> Error : ${error}`);
     }
   }
 
-  async updateStatus(taskId: string, statusId: string) {
+  async isCreator(task_id: string, user_id: string) {
     try {
-      await db.query(
-        ` UPDATE tasks_statuses AS ts 
-          SET status_id = $2 
-          WHERE ts.task_id = $1`,
-        [taskId, statusId],
-      );
-
-      const { rows: status } = await db.query(
-        `SELECT ts.task_id, 
-                s.name as status_name 
-         FROM tasks_statuses AS ts 
-           LEFT JOIN statuses AS s ON ts.status_id = s.id
-         WHERE ts.task_id = $1`,
-        [taskId],
-      );
-
-      return status[0];
+      const [rows] = await db('creators_tasks').select('user_id').where({ task_id }).andWhere({ user_id });
+      return rows;
     } catch (error) {
-      console.log(error);
+      logger.error(`[isCreator] >> Error : ${error}`);
     }
   }
 
-  async updateTitle(taskId: string, statusId: string) {
+  async updateTitle(id: string, title: string) {
     try {
-      await db.query(
-        ` UPDATE tasks_statuses AS ts 
-          SET status_id = $2 
-          WHERE ts.task_id = $1`,
-        [taskId, statusId],
-      );
+      await db('tasks').where({ id }).update({ title });
+      const [updatedTask] = await db('tasks').select('tasks.id', 'tasks.title').where({ id });
 
-      const { rows: status } = await db.query(
-        `SELECT ts.task_id, 
-                s.name as status_name 
-         FROM tasks_statuses AS ts 
-           LEFT JOIN statuses AS s ON ts.status_id = s.id
-         WHERE ts.task_id = $1`,
-        [taskId],
-      );
-
-      return status[0];
+      return updatedTask;
     } catch (error) {
-      console.log(error);
+      logger.error(`[updateTitle] >> Error : ${error}`);
     }
   }
-  async updateDescription(taskId: string, statusId: string) {
+
+  async updateDescription(id: string, description: string) {
     try {
-      await db.query(
-        ` UPDATE tasks_statuses AS ts 
-          SET status_id = $2 
-          WHERE ts.task_id = $1`,
-        [taskId, statusId],
-      );
+      await db('tasks').where({ id }).update({ description });
+      const [updatedTask] = await db('tasks').select('tasks.id', 'tasks.description').where({ id });
 
-      const { rows: status } = await db.query(
-        `SELECT ts.task_id, 
-                s.name as status_name 
-         FROM tasks_statuses AS ts 
-           LEFT JOIN statuses AS s ON ts.status_id = s.id
-         WHERE ts.task_id = $1`,
-        [taskId],
-      );
-
-      return status[0];
+      return updatedTask;
     } catch (error) {
-      console.log(error);
+      logger.error(`[updateDescription] >> Error : ${error}`);
     }
   }
-  async updateDeadline(taskId: string, statusId: string) {
+
+  async updateDeadline(id: string, deadline: string) {
     try {
-      await db.query(
-        ` UPDATE tasks_statuses AS ts 
-          SET status_id = $2 
-          WHERE ts.task_id = $1`,
-        [taskId, statusId],
-      );
+      await db('tasks').where({ id }).update({ deadline });
+      const [updatedTask] = await db('tasks')
+        .select('tasks.id', db.raw("TO_CHAR(tasks.deadline, 'yyyy-mm-dd') AS deadline"))
+        .where({ id });
 
-      const { rows: status } = await db.query(
-        `SELECT ts.task_id, 
-                s.name as status_name 
-         FROM tasks_statuses AS ts 
-           LEFT JOIN statuses AS s ON ts.status_id = s.id
-         WHERE ts.task_id = $1`,
-        [taskId],
-      );
-
-      return status[0];
+      return updatedTask;
     } catch (error) {
-      console.log(error);
+      logger.error(`[updateDeadline] >> Error : ${error}`);
     }
   }
-  async updatePriority(taskId: string, statusId: string) {
+
+  async updatePriority(task_id: string, priority_id: string) {
     try {
-      await db.query(
-        ` UPDATE tasks_statuses AS ts 
-          SET status_id = $2 
-          WHERE ts.task_id = $1`,
-        [taskId, statusId],
-      );
+      const [priority] = await db('tasks_priorities')
+        .where({ task_id })
+        .update({ priority_id })
+        .returning('priority_id');
+      const [priorityName] = await db('priorities').select('name').where({ id: priority.priority_id });
 
-      const { rows: status } = await db.query(
-        `SELECT ts.task_id, 
-                s.name as status_name 
-         FROM tasks_statuses AS ts 
-           LEFT JOIN statuses AS s ON ts.status_id = s.id
-         WHERE ts.task_id = $1`,
-        [taskId],
-      );
-
-      return status[0];
+      return priorityName;
     } catch (error) {
-      console.log(error);
+      logger.error(`[updatePriority] >> Error : ${error}`);
+    }
+  }
+
+  async updateStatus(task_id: string, status_id: string) {
+    try {
+      const [status] = await db('tasks_statuses').where({ task_id }).update({ status_id }).returning('status_id');
+      const [statusName] = await db('statuses').select('name').where({ id: status.status_id });
+
+      return statusName;
+    } catch (error) {
+      logger.error(`[updateStatus] >> Error : ${error}`);
+    }
+  }
+
+  async updateResponsible(task_id: string, user_id: string) {
+    try {
+      await db('responsibles_tasks').where({ task_id }).update({ user_id });
+      const [responsibleName] = await db('users')
+        .select(db.raw("CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name) AS name"))
+        .where({ id: user_id });
+
+      return responsibleName;
+    } catch (error) {
+      logger.error(`[updateResponsible] >> Error : ${error}`);
     }
   }
 }

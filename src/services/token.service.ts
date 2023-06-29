@@ -1,32 +1,30 @@
 import jwt from 'jsonwebtoken';
 import db from '../databases';
-import { TokenPayload, TokenData } from '../interfaces/auth.interfaces';
+import { TokenPayload, TokenData } from '../interfaces/auth.interface';
 import { ACCESS_DURATION, ACCESS_SECRET_KEY, REFRESH_DURATION, REFRESH_SECRET_KEY } from '../config';
 
 class TokenService {
-  generateTokens(dataToken: TokenPayload): TokenData {
-    const accessToken = jwt.sign(dataToken, ACCESS_SECRET_KEY, {
+  generateTokens(toketData: TokenPayload): TokenData {
+    const accessToken = jwt.sign(toketData, ACCESS_SECRET_KEY, {
       expiresIn: ACCESS_DURATION,
     });
-
-    const refreshToken = jwt.sign(dataToken, REFRESH_SECRET_KEY, {
+    const refreshToken = jwt.sign(toketData, REFRESH_SECRET_KEY, {
       expiresIn: REFRESH_DURATION,
     });
+
     return { accessToken, refreshToken };
   }
 
-  async saveToken(userId: string, refreshToken: string) {
-    const { rows: tokenData } = await db.query(`SELECT * FROM tokens WHERE user_id = $1;`, [userId]);
+  async saveToken(user_id: string, refresh_token: string) {
+    const [tokenData] = await db('tokens').select().where({ user_id });
 
-    if (tokenData[0]) {
-      const token = await db.query(`UPDATE tokens SET refresh_token = $1 WHERE user_id = $2;`, [refreshToken, userId]);
-      return token.rows[0];
+    if (tokenData) {
+      await db('tokens').where({ user_id }).update({ refresh_token });
+      return;
     }
-    const token = await db.query(`INSERT INTO tokens (user_id, refresh_token) VALUES ($1, $2);`, [
-      userId,
-      refreshToken,
-    ]);
-    return token.rows[0];
+
+    await db('tokens').insert({ user_id, refresh_token });
+    return;
   }
 
   validateAccessToken(accessToken: string) {
@@ -45,18 +43,13 @@ class TokenService {
     }
   }
 
-  async findToken(refreshToken: string) {
-    const { rows: token } = await db.query(`SELECT * FROM tokens WHERE refresh_token = $1;`, [refreshToken]);
-
-    return token[0];
+  async findToken(refresh_token: string) {
+    const [token] = await db('tokens').select().where({ refresh_token });
+    return token;
   }
 
-  async removeToken(refreshToken: string) {
-    const { rows: removedToken } = await db.query(
-      `DELETE FROM tokens WHERE refresh_token = $1 RETURNING refresh_token;`,
-      [refreshToken],
-    );
-    return removedToken[0];
+  async removeToken(refresh_token: string) {
+    return await db('tokens').where({ refresh_token }).del().returning('refresh_token');
   }
 }
 
