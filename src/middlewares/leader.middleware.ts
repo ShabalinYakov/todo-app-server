@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { RequestWithUser } from '../interfaces/auth.interfaces';
+import { RequestWithUser } from '../interfaces/auth.interface';
 import HttpException from '../exceptions/HttpException';
 
 const checkLeader = (req: Request, res: Response, next: NextFunction) => {

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import prioritiesRouter from './priorities.routes';
-import statusesRouter from './statuses.routes';
-import leaderRouter from './leader.routes';
-import tasksRouter from './tasks.routes';
-import authRouter from './auth.routes';
+import prioritiesRouter from './priorities.route';
+import statusesRouter from './statuses.route';
+import leaderRouter from './leader.route';
+import tasksRouter from './tasks.route';
+import authRouter from './auth.route';
 
 const router = Router({ mergeParams: true });
 

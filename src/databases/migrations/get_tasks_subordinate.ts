@@ -21,21 +21,11 @@ export async function up(knex: Knex): Promise<void> {
           TO_CHAR(tasks.deadline, 'yyyy-mm-dd') AS deadline,
           statuses.name AS status,
           priorities.name AS priority,
-          json_build_object(
-              'id',
-              creator.id,
-              'name',
-              CONCAT(
-                  creator.last_name || ' ' || creator.first_name || ' ' || creator.middle_name
-              )
+          json_build_object('id', creator.id, 'name',
+              CONCAT(creator.last_name || ' ' || creator.first_name || ' ' || creator.middle_name)
           ) AS creator,
-          json_build_object(
-              'id',
-              responsible.id,
-              'name',
-              CONCAT(
-                  responsible.last_name || ' ' || responsible.first_name || ' ' || responsible.middle_name
-              )
+          json_build_object('id', responsible.id, 'name',
+              CONCAT(responsible.last_name || ' ' || responsible.first_name || ' ' || responsible.middle_name)
           ) AS responsible,
           tasks.created_at,
           tasks.updated_at

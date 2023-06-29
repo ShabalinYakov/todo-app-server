@@ -1,13 +1,14 @@
+import { logger } from '@/utils/logger';
 import db from '../databases';
 
 class PrioritiesService {
   async getPriorities() {
     try {
-      const { rows: priorities } = await db.query(`SELECT * FROM priorities;`);
+      const priorities = await db('priorities');
 
       return priorities;
     } catch (error) {
-      console.log(error);
+      logger.error(`[getPriorities] >> Error : ${error}`);
     }
   }
 }
