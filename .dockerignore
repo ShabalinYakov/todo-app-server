@@ -1,0 +1,18 @@
+# compiled output
+
+.husky
+/node_modules
+/build
+
+# code formatter
+
+.eslintrc
+.eslintignore
+.prettierrc
+.prettierignore
+.commitlintrc
+
+# docker
+
+Dockerfile
+docker-compose.yml

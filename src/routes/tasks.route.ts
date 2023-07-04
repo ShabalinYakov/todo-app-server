@@ -1,17 +1,20 @@
-import { tasksController } from '../controllers/tasks.controller';
-import checkCreator from '../middlewares/creator.middleware';
-import authMiddleware from '../middlewares/auth.middleware';
-import checkLeader from '@/middlewares/leader.middleware';
 import { Router } from 'express';
+import { tasksController } from '@controllers/tasks.controller';
+
+import checkResponsibleOrLeader from '@/middlewares/responsible.middleware';
 import validationMiddleware from '@/middlewares/validation.middleware';
-import { TaskDto } from '@/dtos/task.dto';
-import { TitleDto } from '@/dtos/title.dto';
-import { StatusDto } from '@/dtos/status.dto';
-import { DeadlineDto } from '@/dtos/deadline.dto';
-import { PriorityDto } from '@/dtos/priority.dto';
-import { DescriptionDto } from '@/dtos/description.dto';
-import { ResponsibleDto } from '@/dtos/responsible.dto';
+import checkCreator from '@middlewares/creator.middleware';
+import authMiddleware from '@middlewares/auth.middleware';
+import checkLeader from '@/middlewares/leader.middleware';
+
 import { SubordinateDto } from '@/dtos/subordinate.dto';
+import { ResponsibleDto } from '@/dtos/responsible.dto';
+import { DescriptionDto } from '@/dtos/description.dto';
+import { PriorityDto } from '@/dtos/priority.dto';
+import { DeadlineDto } from '@/dtos/deadline.dto';
+import { StatusDto } from '@/dtos/status.dto';
+import { TitleDto } from '@/dtos/title.dto';
+import { TaskDto } from '@/dtos/task.dto';
 
 const tasksRouter = Router({ mergeParams: true });
 
@@ -28,7 +31,7 @@ tasksRouter.patch(
   '/status',
   authMiddleware,
   validationMiddleware(StatusDto, 'body'),
-  checkCreator,
+  checkResponsibleOrLeader,
   tasksController.updateStatus,
 );
 tasksRouter.patch(
@@ -55,15 +58,15 @@ tasksRouter.patch(
 tasksRouter.patch(
   '/responsible',
   authMiddleware,
-  validationMiddleware(ResponsibleDto, 'body'),
   checkLeader,
+  validationMiddleware(ResponsibleDto, 'body'),
   tasksController.updateResponsible,
 );
 tasksRouter.get(
   '/subordinate/:subordinate_id',
   authMiddleware,
-  validationMiddleware(SubordinateDto, 'params'),
   checkLeader,
+  validationMiddleware(SubordinateDto, 'params'),
   tasksController.getTasksSubordinate,
 );
 
