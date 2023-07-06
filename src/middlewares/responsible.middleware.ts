@@ -1,17 +1,22 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 
-import { RequestWithUser } from '../interfaces/auth.interface';
-import HttpException from '../exceptions/HttpException';
-import { tasksService } from '../services/tasks.service';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import HttpException from '@exceptions/HttpException';
+import { tasksService } from '@services/tasks.service';
 
-const checkResponsible = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = (req as RequestWithUser).user.id;
-  const taskId = req.body.taskId;
+const checkResponsibleOrLeader = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  const { task_id } = req.body;
+  const { is_leader } = req.user;
 
-  const isCreator = await tasksService.isCreator(taskId, userId);
-  if (!isCreator) {
+  if (!task_id || typeof task_id !== 'string') {
+    throw HttpException.BadRequest('Invalid value');
+  }
+
+  const isResponsible = await tasksService.isResponsible(task_id, req.user.id);
+
+  if (!isResponsible && !is_leader) {
     next(new HttpException(403, 'Forbidden'));
   }
   return next();
 };
-export default checkResponsible;
+export default checkResponsibleOrLeader;

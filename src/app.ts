@@ -4,6 +4,7 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
+import { join } from 'path';
 import hpp from 'hpp';
 
 import errorMiddleware from '@middlewares/error.middleware';
@@ -23,5 +24,15 @@ app.use(hpp());
 app.use(helmet());
 app.use('/api', router);
 app.use(errorMiddleware);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use('/', express.static(join(__dirname, 'client')));
+
+  const indexPath = join(__dirname, 'client', 'index.html');
+
+  app.get('*', (req, res) => {
+    res.sendFile(indexPath);
+  });
+}
 
 export default app;

@@ -55,6 +55,15 @@ class TasksService {
     }
   }
 
+  async isResponsible(task_id: string, user_id: string) {
+    try {
+      const [rows] = await db('responsibles_tasks').select('user_id').where({ task_id }).andWhere({ user_id });
+      return rows;
+    } catch (error) {
+      logger.error(`[isResponsible] >> Error : ${error}`);
+    }
+  }
+
   async updateTitle(id: string, title: string) {
     try {
       await db('tasks').where({ id }).update({ title });

@@ -1,0 +1,21 @@
+# compiled output
+
+/.husky
+/node_modules
+/build
+/logs
+
+# code formatter
+
+.eslintrc
+.eslintignore
+.prettierrc
+.prettierignore
+.commitlintrc
+
+# docker
+
+Dockerfile
+docker-compose.yml
+
+yarn-error.log
