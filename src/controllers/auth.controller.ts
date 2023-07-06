@@ -1,25 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
-import { validationResult } from 'express-validator';
-
-import { authService } from '../services/auth.service';
-import ApiError from '../exceptions/api-error';
-import { MAX_AGE_COOKIE } from '../config';
+import { authService } from '@services/auth.service';
+import { UserDto } from '@/dtos/user.dto';
+import { MAX_AGE_COOKIE } from '@config';
 
 class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) throw ApiError.BadRequest('Invalid value');
+      const userData: UserDto = req.body;
 
-      const { login, password } = req.body;
-      const response = await authService.login({ login, password });
+      const response = await authService.login(userData);
+
       if (response.error !== null) {
-        res.status(200).send({ error: response.error });
-        return;
+        return res.status(200).send({ error: response.error });
       }
 
       res.cookie('refreshToken', response.refreshToken, {
-        maxAge: MAX_AGE_COOKIE,
+        maxAge: MAX_AGE_COOKIE as unknown as number,
         httpOnly: true,
       });
       res.status(200).send({ accessToken: response.accessToken, user: response.user, error: {} });
@@ -31,10 +27,11 @@ class AuthController {
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.cookies;
+
       const { refreshToken: newToken, accessToken, user } = await authService.refresh(refreshToken);
 
       res.cookie('refreshToken', newToken, {
-        maxAge: MAX_AGE_COOKIE,
+        maxAge: Number(MAX_AGE_COOKIE),
         httpOnly: true,
       });
 

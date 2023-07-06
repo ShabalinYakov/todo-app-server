@@ -1,30 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import { tokenService } from '@services/token.service';
+import HttpException from '@exceptions/HttpException';
 
-import { RequestWithUser } from '../interfaces/auth.interfaces';
-import { tokenService } from '../services/token.service';
-import ApiError from '../exceptions/api-error';
-
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
-      return next(ApiError.UnauthorizedError());
+      return next(HttpException.UnauthorizedError());
     }
 
     const accessToken = authorizationHeader.split(' ')[1];
     if (!accessToken) {
-      return next(ApiError.UnauthorizedError());
+      return next(HttpException.UnauthorizedError());
     }
 
     const userData = tokenService.validateAccessToken(accessToken);
     if (!userData) {
-      return next(ApiError.UnauthorizedError());
+      return next(HttpException.UnauthorizedError());
     }
 
-    (req as RequestWithUser).user = userData;
+    req.user = userData;
     next();
   } catch (error) {
-    return next(ApiError.UnauthorizedError());
+    return next(HttpException.UnauthorizedError());
   }
 };
 export default authMiddleware;

@@ -6,6 +6,9 @@ export async function up(knex: Knex): Promise<void> {
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     refresh_token TEXT NOT NULL
   );
+
+  CREATE INDEX tokens_id_idx
+  ON tokens(user_id);
   `);
 }
 

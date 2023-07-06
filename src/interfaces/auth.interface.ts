@@ -1,8 +1,14 @@
 import { Request } from 'express';
+import { User } from './user.interfaces';
 
-export interface LoginPayload {
-  login: string;
-  password: string;
+export interface LoginResponse {
+  user?: Pick<User, 'id' | 'login' | 'first_name' | 'middle_name' | 'last_name' | 'is_leader'>;
+  error?: {
+    code: number;
+    message: string;
+  };
+  refreshToken?: string;
+  accessToken?: string;
 }
 
 export interface TokenPayload {

@@ -11,6 +11,9 @@ export async function up(knex: Knex): Promise<void> {
     last_name VARCHAR NOT NULL,
     is_leader BOOLEAN DEFAULT FALSE
   );
+
+  CREATE INDEX users_id_idx
+  ON users(login);
   `);
 }
 
