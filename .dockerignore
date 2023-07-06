@@ -1,8 +1,9 @@
 # compiled output
 
-.husky
+/.husky
 /node_modules
 /build
+/logs
 
 # code formatter
 
@@ -16,3 +17,5 @@
 
 Dockerfile
 docker-compose.yml
+
+yarn-error.log
